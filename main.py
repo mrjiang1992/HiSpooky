@@ -28,14 +28,14 @@ def getCall():
         """The starting procedure"""
         if (request.values.get('Body',None).lower() == "start" ):
             """if there is room then keep adding to Queue"""
-            if(len(cur)==1 and str(request.values.get('From', None)) not in cur):
+            if(len(cur)==4 and str(request.values.get('From', None)) not in cur):
                 """This is where we start the story because we add the 10th person"""
                 cur.append(request.values.get('From', None))
                 storyTime=True;
                 client.messages.create(to=cur[0], from_="+1585-270-7626",body="You will begin the Spooky Story please keep it within 140 characters! ") 
                 resp.message("You have entered the Queue You are Number "+str(len(cur) )+" Please wait for your turn!")
                 
-            elif(len(cur)<2):
+            elif(len(cur)<5):
         
                 if str(request.values.get('From', None)) in cur:
                     resp.message("You are in the Queue already!")
@@ -63,7 +63,7 @@ def getCall():
                     a+=1
                     resp.message("Your message is added to the story please wait for it to finish!")
                     """Message the next person that it is their turn """
-                    if(c==1):
+                    if(c==4):
                        
                         x=0
                         while x<len(cur):
@@ -90,7 +90,7 @@ def getCall():
             else:
                 """ERROR: not in queue"""
                 
-                resp.message("ERROR: To Join Queue say start")
+                resp.message("ERROR: To join queue say start")
                     
     
     return str(resp)

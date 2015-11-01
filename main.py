@@ -6,46 +6,75 @@ app = Flask(__name__)
 cur=[]
 a=0
 message=""
+account_sid = "AC36c5c6423b5cc522e118a8915a0ba81b"
+auth_token = "8c2c310fb78dbe50c1afe54211a48f3f"
+client = TwilioRestClient(account_sid, auth_token)
+storyTime= False;"""False means that people are being added"""
 @app.route("/", methods=['GET', 'POST'])
 def getCall():
     global a
     global message
+    global account_sid
+    global auth_token
+    global client
+    global storyTime
+    global cur
     resp = twilio.twiml.Response()
-    
+    """ for blank case"""
     if (request.values.get('Body',None)):
-        
-        if (request.values.get('Body',None) == "Start" or request.values.get('Body',None) == "start"):
-            
-            if(len(cur)<10):
+        """The starting procedure"""
+        if (request.values.get('Body',None).lower() == "start" ):
+            """if there is room then keep adding to Queue"""
+            if(len(cur)==1 and str(request.values.get('From', None)) not in cur):
+                """This is where we start the story because we add the 10th person"""
+                cur.append(request.values.get('From', None))
+                storyTime=True;
+                client.messages.create(to=cur[0], from_="+1585-270-7626",body="You will begin the Spooky Story please keep it within 140 characters! ") 
+                resp.message("You have entered the Queue You are Number "+str(len(cur) )+" Please wait for your turn!")
+                
+            elif(len(cur)<2):
         
                 if str(request.values.get('From', None)) in cur:
                     resp.message("You are in the Queue already!")
             
                 else:
-                    resp.message("You have entered the Queue You are Number "+str(len(cur)+1)+" Please wait for your turn!")
+                    resp.message("You have entered the Queue You are Number "+str(len(cur))+" Please wait for your turn!")
                     cur.append(request.values.get('From', None))
             
             else:
-                resp.message("There is too many in the queue")
+               
+                    resp.message("Please try again later when another story is happenning")
+                    
         else:
+            
             """You are in queue and have a message other then Start"""
             if str(request.values.get('From', None)) in cur:
+                """finds the index"""
                 c=0
                 while c<len(cur):
                     if cur[c]== request.values.get('From', None):
                         break;
                     c+=1
+                    
                 if (c==a):
                     """Add message to the array increment a"""
                     message+=request.values.get('Body',None)
                     a+=1
                     resp.message("Your message is added to the story please wait for it to finish!")
                     """Message the next person that it is their turn """
-                    account_sid = "AC36c5c6423b5cc522e118a8915a0ba81b"
-                    auth_token = "8c2c310fb78dbe50c1afe54211a48f3f"
-                    client = TwilioRestClient(account_sid, auth_token)
-                    client.messages.create(to=cur[a], from_="+1585-270-7626",body="Please continue the story and limit it to 140 characters. Here is the story so far:") 
-                    client.messages.create(to=cur[a], from_="+1585-270-7626",body=message) 
+                    if(a==1):
+                        
+                        x=0
+                        while c<len(cur):
+                            client.messages.create(to=cur[x], from_="+1585-270-7626",body="Here is the final Story!") 
+                            client.messages.create(to=cur[x], from_="+1585-270-7626",body=message) 
+                            x+=1
+                        storyTime=False
+                        a=0
+                        cur=[]    
+                    else:
+                        client.messages.create(to=cur[a], from_="+1585-270-7626",body="Continue the story and please limit it to 140 characters. Here is the story so far:") 
+                        client.messages.create(to=cur[a], from_="+1585-270-7626",body=message) 
 
                 elif(c<a):
                     """Have already gone and are in queue"""
@@ -55,7 +84,7 @@ def getCall():
                     resp.message("Please wait untill it is your turn for the story.")
                     
             else:
-                """ERROR: not in queue and """
+                """ERROR: not in queue"""
                 
                 resp.message("ERROR: To Join Queue say start")
                     

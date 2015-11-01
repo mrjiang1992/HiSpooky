@@ -3,8 +3,11 @@ from twilio.rest import TwilioRestClient
 import twilio.twiml
  
 app = Flask(__name__)
-cur=[]
+"""People in the Queue"""
+cur=[] 
+"""Count of going over people!"""
 a=0
+"""This it the output message"""
 message=""
 account_sid = "AC36c5c6423b5cc522e118a8915a0ba81b"
 auth_token = "8c2c310fb78dbe50c1afe54211a48f3f"
@@ -38,12 +41,10 @@ def getCall():
                     resp.message("You are in the Queue already!")
             
                 else:
-                    resp.message("You have entered the Queue You are Number "+str(len(cur))+" Please wait for your turn!")
                     cur.append(request.values.get('From', None))
-            
+                    resp.message("You have entered the Queue You are Number "+str(len(cur))+" Please wait for your turn!")
             else:
-               
-                    resp.message("Please try again later when another story is happenning")
+                    resp.message("Please try again later when another story is happenning ")
                     
         else:
             
@@ -58,20 +59,23 @@ def getCall():
                     
                 if (c==a):
                     """Add message to the array increment a"""
-                    message+=request.values.get('Body',None)
+                    message+=request.values.get('Body',None)+" "
                     a+=1
                     resp.message("Your message is added to the story please wait for it to finish!")
                     """Message the next person that it is their turn """
-                    if(a==1):
-                        
+                    if(c==1):
+                       
                         x=0
-                        while c<len(cur):
-                            client.messages.create(to=cur[x], from_="+1585-270-7626",body="Here is the final Story!") 
-                            client.messages.create(to=cur[x], from_="+1585-270-7626",body=message) 
+                        while x<len(cur):
+                            client.messages.create(to=cur[x], from_="+1585-270-7626",body="Here is the Spooky Story!") 
+                            client.messages.create(to=cur[x], from_="+1585-270-7626",body=message)
+                            client.messages.create(to=cur[x], from_="+1585-270-7626",body="Thanks for playing!")  
                             x+=1
-                        storyTime=False
+                        message =""
+                        storyTime=not storyTime
                         a=0
-                        cur=[]    
+                        cur=[]  
+                         
                     else:
                         client.messages.create(to=cur[a], from_="+1585-270-7626",body="Continue the story and please limit it to 140 characters. Here is the story so far:") 
                         client.messages.create(to=cur[a], from_="+1585-270-7626",body=message) 
